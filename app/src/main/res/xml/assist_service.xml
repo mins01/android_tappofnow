@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<voice-interaction-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:recognitionService="com.ggook.new10.tappofnow.AssistLoggerService"
+    android:sessionService="com.ggook.new10.tappofnow.AssistLoggerSessionSevice"
+    android:supportsAssist="true"/>
+
+    <!--
+      android:settingsActivity="com.android.test.voiceinteraction.SettingsActivity"
+    -->
