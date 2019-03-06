@@ -63,7 +63,12 @@ public class PickupKeywordsByAssist extends PickupKeywords {
 
     public PickupKeywordsByAssist(){
         super();
-        conf_scores = (JsonObject)(new JsonParser()).parse(this.jsonString_conf_scores);
+//        conf_scores = (JsonObject)(new JsonParser()).parse(this.jsonString_conf_scores);
+        conf_scores.addProperty("android.view.view",1);
+        conf_scores.addProperty("android.widget.edittext",100);
+        conf_scores.addProperty("node",0);
+        conf_scores.addProperty("input",200);
+        Log.v("@@con",conf_scores.toString());
         numeric_multiple = 0.1;
     }
     public void setUrlWithCallback(String url,CallbackForWordInfo callback) throws Exception{

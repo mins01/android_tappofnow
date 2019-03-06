@@ -19,6 +19,7 @@ import android.service.voice.VoiceInteractionSession;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewStructure;
@@ -71,6 +72,9 @@ public class AssistLoggerSession extends VoiceInteractionSession {
         view = getLayoutInflater().inflate(R.layout.assist_main,null);
 //        view = new CustomView(getContext());
         setContentView(view);
+
+        TextView tv = (TextView) view.findViewById(R.id.textViewOutput);
+        tv.setMovementMethod(new ScrollingMovementMethod());
 
         Log.v("@@",this.getClass().getName()+"."+new Object(){}.getClass().getEnclosingMethod().getName());
 
@@ -126,7 +130,6 @@ public class AssistLoggerSession extends VoiceInteractionSession {
         });
         return view;
     }
-
     public void getContentText(AssistStructure structure){
         selectedContentList.clear();
 //        HashMap<String,Integer> contentMap = new HashMap<String,Integer>();
@@ -149,30 +152,37 @@ public class AssistLoggerSession extends VoiceInteractionSession {
 
 
         CallbackForWordInfo callback = new CallbackForWordInfo();
-        callback.textViewOutput = tv;
+        callback.tv = tv;
 
         try {
             nis = pkba.getNodeInfoByViewNode(structure.getWindowNodeAt(0).getRootViewNode());
             url = pkba.getUrlFromNodeInfo(nis,packagename);
-            if(url != null &&  !url.isEmpty()){ //URL이 포함 안된 경우
-                Log.v("@@","Found Url");
-                tv.setText(tv.getText()+"\n"+"CALL URL : "+url);
-                pkba.setUrlWithCallback(url,callback);
-            }else{
-                tv.setText(tv.getText()+"\n"+"NO URL");
-                tis = pkba.nodeInfoToTextInfo(nis);
-                wis = pkba. getWords(tis);
-                callback.wis = wis;
-                callback.run();
+
+            Log.v("@@","No Url");
+            tv.append("\n"+"NO URL");
+            tis = pkba.nodeInfoToTextInfo(nis);
+            wis = pkba. getWords(tis);
+            String text="\n";
+            for(int i=0,m=wis.size();i<m && i<10;i++){
+                WordInfo wi = wis.get(i);
+                Log.v("@wi-no-url",wi.toString());
+                text += "[no-url]"+Integer.toString(i+1)+". "+wi.toString()+"\n";
+//                tv.append("[no-url]"+Integer.toString(i+1)+". "+wi.toString()+"\n");
+                Log.v("@wi-no-url","[no-url]"+Integer.toString(i+1)+". "+wi.toString());
             }
+            tv.append(text);
 
 
-//            for(int i=0,m=tis.size();i<m;i++){
-//                Log.v("@text",tis.get(i).toString());
-//            }
-//            for(int i=0,m=wis.size();i<m;i++){
-//                Log.v("@word",wis.get(i).toString());
-//            }
+
+            if(url != null &&  !url.isEmpty()){ //URL이 포함 안된 경우
+//                callback.tv = tv;
+                Log.v("@@","Found Url");
+                tv.append("\n"+"CALL URL : "+url);
+                pkba.setUrlWithCallback(url,callback);
+            }
+            tv.append("END");
+
+
 
         } catch (Exception e) {
             e.printStackTrace();
