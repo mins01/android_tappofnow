@@ -130,7 +130,12 @@ public class AssistLoggerSession extends VoiceInteractionSession {
     public void getContentText(AssistStructure structure){
         selectedContentList.clear();
 //        HashMap<String,Integer> contentMap = new HashMap<String,Integer>();
-        TextView tv = (TextView) view.findViewById(R.id.textView2);
+        String packagename = structure.getActivityComponent().getPackageName();
+        TextView tv = (TextView) view.findViewById(R.id.textViewOutput);
+
+        Log.v("@packagename",packagename);
+        tv.setText(packagename);
+
         ArrayList<String> contentList = new ArrayList<>();
 //        getText(contentList,structure.getWindowNodeAt(0).getRootViewNode());
         PickupKeywordsByAssist pkba = new PickupKeywordsByAssist();
@@ -144,15 +149,17 @@ public class AssistLoggerSession extends VoiceInteractionSession {
 
 
         CallbackForWordInfo callback = new CallbackForWordInfo();
-
+        callback.textViewOutput = tv;
 
         try {
             nis = pkba.getNodeInfoByViewNode(structure.getWindowNodeAt(0).getRootViewNode());
-            url = pkba.getUrlFromNodeInfo(nis);
+            url = pkba.getUrlFromNodeInfo(nis,packagename);
             if(url != null &&  !url.isEmpty()){ //URL이 포함 안된 경우
                 Log.v("@@","Found Url");
+                tv.setText(tv.getText()+"\n"+"CALL URL : "+url);
                 pkba.setUrlWithCallback(url,callback);
             }else{
+                tv.setText(tv.getText()+"\n"+"NO URL");
                 tis = pkba.nodeInfoToTextInfo(nis);
                 wis = pkba. getWords(tis);
                 callback.wis = wis;
@@ -217,10 +224,6 @@ public class AssistLoggerSession extends VoiceInteractionSession {
         super.onHandleAssist(data, structure, content);
 
         Log.v("@@",this.getClass().getName()+"."+new Object(){}.getClass().getEnclosingMethod().getName());
-
-        Log.v("@@","CALL PACKAGE : "+structure.getActivityComponent().getPackageName());
-        ((TextView) view.findViewById(R.id.textView2)).setText("");
-        ((TextView) view.findViewById(R.id.textView2)).setText(structure.getActivityComponent().getPackageName());
 
         lastData = data;
         lastStructure = structure;

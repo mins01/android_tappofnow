@@ -78,10 +78,19 @@ public class PickupKeywordsByAssist extends PickupKeywords {
      * @param nis
      * @return
      */
-    public String getUrlFromNodeInfo(ArrayList<NodeInfo> nis){
+    public String getUrlFromNodeInfo(ArrayList<NodeInfo> nis,String packagename){
         for (NodeInfo ni : nis){
-            if (ni.idEntry.equals("url") && ni.text.indexOf("http") == 0) { //URL이 있는지 체크 안한다.
-                Log.v("@ACT","CALL URL:"+ni.text);
+            if (packagename.equals("com.android.chrome") && ni.idEntry.equals("url_bar")) { //URL이 있는지 체크 안한다.
+                if(ni.text.indexOf("http")!=0){ //크롬의 경우 http:// 부분이 빠져서 보임
+                    ni.text = "http://"+ni.text;
+                }
+                Log.v("@ACT","CALL URL-com.android.chrome : "+ni.text);
+                return ni.text;
+            }else if (packagename.equals("com.android.browser") && ni.idEntry.equals("url")) { //URL이 있는지 체크 안한다.
+                Log.v("@ACT","CALL URL-com.android.browser : "+ni.text);
+                return ni.text;
+            }else if (ni.idEntry.indexOf("url")==0 && ni.text.indexOf("http")==0 ) { //url이라는 id이고 http 로 시작하는 경우
+                Log.v("@ACT","CALL URL-??? : "+ni.text);
                 return ni.text;
             }
         }
@@ -135,7 +144,7 @@ public class PickupKeywordsByAssist extends PickupKeywords {
 
             nis.add(ni);
 //            Log.v("@raw",viewNode.getClassName()+"\t/"+getIdEntry+"\t/"+getText+"\t/"+getContentDescription+"\t/"+viewNode.getWidth()+"/\t"+viewNode.getHeight()+"/\t"+viewNode.getTop()+"/\t"+viewNode.getLeft()+"\t/"+viewNode.getTextSize());
-//            Log.v("@row",ni.toString()+","+Math.round(viewNode.getTextSize()));
+            Log.v("@row",ni.toString()+","+Math.round(viewNode.getTextSize()));
         }
 
 
