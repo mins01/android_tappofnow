@@ -39,6 +39,7 @@ public class CallbackForWordInfo implements Runnable {
             Button button = new Button(context);
             button.setText("["+(i+1)+"]search : "+wi.toString());
             button.setTextSize(12);
+            button.setTransformationMethod(null);
             button.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
             button.setOnClickListener(new Button.OnClickListener(){
                 @Override
