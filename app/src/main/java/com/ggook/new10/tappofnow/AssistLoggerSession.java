@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +38,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Node;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,10 +56,13 @@ import static android.support.v4.content.ContextCompat.startActivity;
 public class AssistLoggerSession extends VoiceInteractionSession {
     private View view;
     private ArrayList<String> selectedContentList = new ArrayList<>() ;
+    Context context =null;
+    LinearLayout llr = null;
 
     public AssistLoggerSession(Context context) {
         super(context);
         Log.v("@@","AssistLoggerSession.AssistLoggerSession");
+
 
     }
     @Override
@@ -67,14 +76,16 @@ public class AssistLoggerSession extends VoiceInteractionSession {
 
     @Override
     public View onCreateContentView() {
+        context = getContext();
+        view = getLayoutInflater().inflate(R.layout.assist_main,null);
         super.onCreateContentView();
 //        view = getLayoutInflater().inflate(R.layout.activity_main,null);
-        view = getLayoutInflater().inflate(R.layout.assist_main,null);
+
+
+        llr = (LinearLayout) view.findViewById(R.id.linearLayoutResult);
+
 //        view = new CustomView(getContext());
         setContentView(view);
-
-        TextView tv = (TextView) view.findViewById(R.id.textViewOutput);
-        tv.setMovementMethod(new ScrollingMovementMethod());
 
         Log.v("@@",this.getClass().getName()+"."+new Object(){}.getClass().getEnclosingMethod().getName());
 
@@ -131,13 +142,14 @@ public class AssistLoggerSession extends VoiceInteractionSession {
         return view;
     }
     public void getContentText(AssistStructure structure){
+        llr.removeAllViews();
         selectedContentList.clear();
 //        HashMap<String,Integer> contentMap = new HashMap<String,Integer>();
         String packagename = structure.getActivityComponent().getPackageName();
-        TextView tv = (TextView) view.findViewById(R.id.textViewOutput);
+        ((TextView) view.findViewById(R.id.editTextPackagename)).setText(packagename);
 
         Log.v("@packagename",packagename);
-        tv.setText(packagename);
+
 
         ArrayList<String> contentList = new ArrayList<>();
 //        getText(contentList,structure.getWindowNodeAt(0).getRootViewNode());
@@ -152,35 +164,44 @@ public class AssistLoggerSession extends VoiceInteractionSession {
 
 
         CallbackForWordInfo callback = new CallbackForWordInfo();
-        callback.tv = tv;
+        callback.llr = llr;
+        callback.context = context;
+
+//        callback.tv = tv;
 
         try {
             nis = pkba.getNodeInfoByViewNode(structure.getWindowNodeAt(0).getRootViewNode());
             url = pkba.getUrlFromNodeInfo(nis,packagename);
 
             Log.v("@@","No Url");
-            tv.append("\n"+"NO URL");
+
+            Button button = new Button(context);
+            button.setText("No-URL");
+            button.setTextSize(14);
+            llr.addView(button,new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+
+
             tis = pkba.nodeInfoToTextInfo(nis);
             wis = pkba. getWords(tis);
-            String text="\n";
-            for(int i=0,m=wis.size();i<m && i<10;i++){
-                WordInfo wi = wis.get(i);
-                Log.v("@wi-no-url",wi.toString());
-                text += "[no-url]"+Integer.toString(i+1)+". "+wi.toString()+"\n";
-//                tv.append("[no-url]"+Integer.toString(i+1)+". "+wi.toString()+"\n");
-                Log.v("@wi-no-url","[no-url]"+Integer.toString(i+1)+". "+wi.toString());
-            }
-            tv.append(text);
-
-
-
+            callback.wis = wis;
+//            callback.run();
             if(url != null &&  !url.isEmpty()){ //URL이 포함 안된 경우
+                ((TextView) view.findViewById(R.id.editTextUrl)).setText(url.toString());
+
 //                callback.tv = tv;
                 Log.v("@@","Found Url");
-                tv.append("\n"+"CALL URL : "+url);
+
+                button = new Button(context);
+                button.setText("Use-URL");
+                button.setTextSize(14);
+                llr.addView(button,new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
                 pkba.setUrlWithCallback(url,callback);
+            }else{
+                ((TextView) view.findViewById(R.id.editTextUrl)).setText("");
+                callback.run();
             }
-            tv.append("END");
+
+
 
 
 

@@ -13,6 +13,9 @@ import com.mins01.java.PickupKeywords.WordInfo;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 
 public class PickupKeywordsByAssist extends PickupKeywords {
     public String jsonString_conf_scores = "{\"android.view.view\":1,\"android.widget.edittext\":100,\"node\":1,\"h1\":50,\"h2\":40,\"h3\":30,\"h4\":20,\"h5\":10,\"h6\":10,\"title\":100,\"span\":5,\"a\":1,\"li\":5,\"meta-description\":50,\"meta-keywords\":50,\"meta-og:title\":100,\"meta-og:description\":25}";
@@ -54,7 +57,9 @@ public class PickupKeywordsByAssist extends PickupKeywords {
             ArrayList<TextInfo> tis = pkba.getTexts();
             ArrayList<WordInfo> wis = pkba.getWords(tis);
 //            callback.tis = tis;
-            callback.wis = wis;
+            //callback.wis = wis;
+
+            callback.wis = mergeWordInfo(new ArrayList<WordInfo>(callback.wis.subList(0,Math.min(callback.wis.size(),10))),new ArrayList<WordInfo>(wis.subList(0,Math.min(wis.size(),10)))); //이전 내용과 합쳐서 출력. 10위,10위 합쳐서 출력
             callback.run();
 
         }
@@ -158,5 +163,69 @@ public class PickupKeywordsByAssist extends PickupKeywords {
             getNodeInfo(nis,viewNode.getChildAt(i2));
         }
 //        return ti;
+    }
+    /**
+     * wis 들을 합친다. 합칠 때 순위를 기준으로 한다.
+     * @param wis1
+     * @param wis2
+     * @return
+     */
+    public ArrayList<WordInfo> mergeWordInfo(ArrayList<WordInfo> wis1,ArrayList<WordInfo> wis2){
+        HashMap<String,WordInfo> hmsw = new HashMap<String,WordInfo>();
+        WordInfo wi = null;
+//        ArrayList<WordInfo> wis_ = ((ArrayList<WordInfo>)wis1.clone());
+//        wis_.addAll(wis2);
+//        Log.v("@count",Integer.toString(wis1.size()));
+        for(int i=0,m=wis1.size();i<m;i++){
+            wi = wis1.get(i);
+
+            WordInfo wi0;
+            if(hmsw.containsKey(wi.word)){
+                wi0 = hmsw.get(wi.word);
+            }else{
+                wi0 = new WordInfo();
+                wi0.word = wi.word;
+                wi0.score = 0;
+                hmsw.put(wi.word,wi0);
+            }
+            wi0.count++;
+            wi0.score += (m-i);
+//            Log.v("@score",Double.toString(wi0.score)+","+wi.toString()+"::"+wi0.toString());
+
+        }
+        for(int i=0,m=wis2.size();i<m;i++){
+            wi = wis2.get(i);
+
+            WordInfo wi0;
+            if(hmsw.containsKey(wi.word)){
+                wi0 = hmsw.get(wi.word);
+            }else{
+                wi0 = new WordInfo();
+                wi0.word = wi.word;
+                wi0.score = 0;
+                hmsw.put(wi.word,wi0);
+            }
+            wi0.count++;
+            wi0.score += (m-i);
+//            Log.v("@score",Double.toString(wi0.score)+","+wi.toString()+"::"+wi0.toString());
+        }
+
+        ArrayList<WordInfo> wis = new ArrayList<WordInfo>(hmsw.values());
+        Collections.sort(wis, new Comparator<WordInfo>() {
+            public int compare(WordInfo lhs, WordInfo rhs) {
+                double r = rhs.score - lhs.score;
+                if (r == 0.0D) {
+                    r = rhs.score / (double)rhs.count - lhs.score / (double)lhs.count;
+                }
+
+                if (r < 0.0D) {
+                    return -1;
+                } else {
+                    return r > 0.0D ? 1 : 0;
+                }
+            }
+        });
+//        wis.subList(0,Math.min(wis.size(),10));
+        return wis;
     }
 }
