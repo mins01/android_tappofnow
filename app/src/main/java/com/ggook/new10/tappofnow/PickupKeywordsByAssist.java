@@ -72,7 +72,7 @@ public class PickupKeywordsByAssist extends PickupKeywords {
         conf_scores.addProperty("android.view.view",1);
         conf_scores.addProperty("android.widget.edittext",100);
         conf_scores.addProperty("node",0);
-        conf_scores.addProperty("input",200);
+        conf_scores.addProperty("input",100);
         Log.v("@@con",conf_scores.toString());
         numeric_multiple = 0.1;
     }
@@ -141,7 +141,7 @@ public class PickupKeywordsByAssist extends PickupKeywords {
 
 //        int tss = viewNode.getTextSelectionStart();
 //        int tse = viewNode.getTextSelectionEnd();
-        int score = conf_scores.has(getIdEntry) ? conf_scores.get(getIdEntry).getAsInt():1;
+        int score = conf_scores.has(getClassName) ? conf_scores.get(getClassName).getAsInt():1;
         NodeInfo ni = null;
 
         if(getText != "" && getText.length()>0 && viewNode.getTop() >= 0 && viewNode.getLeft() >= 0){
@@ -153,7 +153,7 @@ public class PickupKeywordsByAssist extends PickupKeywords {
             ni.score = Math.round(viewNode.getWidth()*viewNode.getHeight()/100)*score;
 
             nis.add(ni);
-//            Log.v("@raw",viewNode.getClassName()+"\t/"+getIdEntry+"\t/"+getText+"\t/"+getContentDescription+"\t/"+viewNode.getWidth()+"/\t"+viewNode.getHeight()+"/\t"+viewNode.getTop()+"/\t"+viewNode.getLeft()+"\t/"+viewNode.getTextSize());
+            Log.v("@raw",viewNode.getClassName()+"\t/"+getIdEntry+"\t/"+getText+"\t/"+getContentDescription+"\t/"+ni.score+"\t/"+score+"\t/"+viewNode.getWidth()+"/\t"+viewNode.getHeight()+"/\t"+viewNode.getTop()+"/\t"+viewNode.getLeft()+"\t/"+viewNode.getTextSize());
             Log.v("@row",ni.toString()+","+Math.round(viewNode.getTextSize()));
         }
 
